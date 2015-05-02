@@ -33,10 +33,10 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     // Setting the text fields' text attributes
     let memeTextAttributes = [
-        NSStrokeColorAttributeName: UIColor.blackColor(),
+        NSStrokeColorAttributeName: UIColor.purpleColor(),
         NSForegroundColorAttributeName: UIColor.whiteColor(),
-        NSFontAttributeName: UIFont(name: "HelveticaNeue-CondensedBlack", size: 20)!,
-        NSStrokeWidthAttributeName: NSNumber(float: -4.0)
+        NSFontAttributeName: UIFont(name: "Trebuchet-BoldItalic", size: 40)!,
+        NSStrokeWidthAttributeName: NSNumber(float: -2.0)
     ]
     
     
@@ -87,9 +87,9 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         pickingImage()
         imagePickerController.sourceType = UIImagePickerControllerSourceType.Camera
     }
-    
+   
+    // Defaults of the text fields when app first launches
     func defaultSettings() {
-        // Defaults of the text fields when app first launches
         topTextField.text = "TOP"
         topTextField.textAlignment = NSTextAlignment.Center
         bottomTextField.text = "BOTTOM"
@@ -98,8 +98,7 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-       defaultSettings()
+        defaultSettings()
         
         // Disable the shareButton when app first launches, before user's selected an image
         shareButton.enabled = false
@@ -107,6 +106,8 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         // Calling the text fields's text attributes when app first launches
         topTextField.defaultTextAttributes = memeTextAttributes
         bottomTextField.defaultTextAttributes = memeTextAttributes
+        topTextField.borderStyle = UITextBorderStyle.None
+        bottomTextField.borderStyle = UITextBorderStyle.None
         
         // Calling the text fields delegates
         self.topTextField.delegate = topTextFieldDelegate
@@ -117,7 +118,6 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        
         defaultSettings()
         
         // Checking if the device's camera is available or not?
@@ -125,7 +125,6 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         // To adhere to keyboard's appearance mechanism
         self.subscribeToKeyboardNotifications()
-        
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -135,12 +134,7 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         self.unsubscribeFromKeyboardNotifications()
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
-    }
-    
-    
+
     // Showing the selected image in the editor after picking-up is accomplished successfully
     func imagePickerController(imagePickerController: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
         if let originalImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
@@ -155,7 +149,7 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     }
     
     // Dismissing the image picker controller when user cancels the picking process
-        func imagePickerControllerDidCancel(imagePickerView: UIImagePickerController) {
+    func imagePickerControllerDidCancel(imagePickerView: UIImagePickerController) {
             self.dismissViewControllerAnimated(true, completion: nil)
         }
     
@@ -192,7 +186,7 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     // Implemnt the Share button fuction
     @IBAction func shareToSocialMedia() {
         var sharedMeme = generateMemedImage()
-        let sharingController = UIActivityViewController(activityItems: [generateMemedImage()], applicationActivities: nil)
+        var sharingController = UIActivityViewController(activityItems: [sharedMeme], applicationActivities: nil)
         self.presentViewController(sharingController, animated: true, completion: nil)
         
         // Save any Sent Memes inside the app,
@@ -200,10 +194,10 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             (activity, success, items, error) in
             self.saveASentMeme()
             
-       // and show the Sent Memes View Selector after saving the Sent Meme
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
-            self.presentViewController(vc, animated: true, completion: nil)
+        // and show the Sent Memes View Selector after saving the Sent Meme
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
+        self.presentViewController(vc, animated: true, completion: nil)
         
         }
     }
@@ -212,28 +206,29 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     // Saving the Sent Meme into an array of Memes inside AppDelegate
     func saveASentMeme() {
         var meme = Meme(top: topTextField.text!, bottom: bottomTextField.text!, image: imageView.image!, memedImage: generateMemedImage())
-        
         (UIApplication.sharedApplication().delegate as! AppDelegate).memes.append(meme)
-        var memoz = (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count
         
+        var memoz = (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count
         println("You have \(memoz) Memes Sent")
     }
     
     
     // Generating a Meme Image
     func generateMemedImage() -> UIImage {
-        // Render the current view to a Memed Image
+        
+        // Hide the Top and Bottom toolbars before rendering the image
         self.topToolBar.hidden = true
         self.bottomToolBar.hidden = true
-    
+        
+        // Render the current view to a Memed Image
         UIGraphicsBeginImageContext(self.view.frame.size)
         self.view.drawViewHierarchyInRect(self.view.frame,afterScreenUpdates: true)
         let memedImage : UIImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
+        // Show the Top and Bottom toolbars again after successfully rendering the image
         self.topToolBar.hidden = false
         self.bottomToolBar.hidden = false
-        
         
         return memedImage
     }

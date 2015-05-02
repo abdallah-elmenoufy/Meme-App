@@ -11,9 +11,11 @@ import UIKit
 
 class BottomTextFieldDelegate: NSObject, UITextFieldDelegate {
     
+    
     func textFieldDidBeginEditing(textField: UITextField) {
         if textField.text == "BOTTOM" {
             textField.text = ""
+            textField.autocapitalizationType = UITextAutocapitalizationType.AllCharacters
         }
     }
     func textFieldShouldReturn(textField: UITextField) -> Bool {

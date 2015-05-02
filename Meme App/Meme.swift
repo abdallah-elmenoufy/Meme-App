@@ -22,4 +22,5 @@ struct Meme {
         self.image = image
         self.memedImage = memedImage
     }
+    
 }

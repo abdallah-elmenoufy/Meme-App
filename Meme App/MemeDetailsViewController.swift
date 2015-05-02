@@ -15,10 +15,9 @@ class MemeDetailsViewController: UIViewController {
     
     var meme: Meme!
 
-    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        
+        self.navigationItem.rightBarButtonItem = editButtonItem()
         self.imageViewCell!.image = meme.memedImage
         
     }
