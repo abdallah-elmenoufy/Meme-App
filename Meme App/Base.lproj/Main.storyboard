@@ -193,7 +193,7 @@
             <objects>
                 <tabBarController storyboardIdentifier="TabBarOfSentMemes" useStoryboardIdentifierAsRestorationIdentifier="YES" id="WZd-b3-CQg" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="7yP-nv-UJ2"/>
-                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="HVo-uu-BnV">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>

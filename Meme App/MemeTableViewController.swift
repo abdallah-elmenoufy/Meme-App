@@ -13,12 +13,12 @@ import Dispatch
 
 class MemeTableViewController:  UITableViewController, UITableViewDataSource, UITableViewDelegate {
     
-    var memes = [Meme]()
+    var memes: [Meme]!
     
     override func viewWillAppear(animated: Bool) {
         let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         memes = applicationDelegate.memes
-        tableView.reloadData()
+//        tableView.reloadData()
     }
     
     // To add a new Meme image, by launching the Meme Editor Screen
@@ -37,9 +37,13 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
         memes = applicationDelegate.memes
         
         if memes.count > 0 {
+            
             println("You have \(memes.count) >0 SentMemes")
             
-        } else if self.memes.count == 0 {
+        }
+            
+        else if self.memes.count == 0 {
+            
             let storyboard = self.storyboard
             let vc = storyboard!.instantiateViewControllerWithIdentifier("MemeViewController") as! UIViewController
             self.presentViewController(vc, animated: true, completion: nil)
@@ -48,12 +52,14 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
     
     }
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Add an Edit button as Left Bar Button Item
         self.navigationItem.leftBarButtonItem = self.editButtonItem()
         let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         memes = applicationDelegate.memes
+        
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -89,8 +95,11 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
             let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
             memes = applicationDelegate.memes
             memes.removeAtIndex(indexPath.row)
-            println("You have now \(memes.count) Memes")
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+            tableView.reloadData()
+            
+                println("You have now \(memes.count) Memes after deletion")
+
         }
     }
     
@@ -103,7 +112,6 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
     override func tableView(tableView: UITableView, shouldIndentWhileEditingRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
     }
-    
 
 }
 

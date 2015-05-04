@@ -192,14 +192,18 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         // Save any Sent Memes inside the app,
         sharingController.completionWithItemsHandler = {
             (activity, success, items, error) in
-            self.saveASentMeme()
-            
-        // and show the Sent Memes View Selector after saving the Sent Meme
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
-        self.presentViewController(vc, animated: true, completion: nil)
+            if success {
+              self.saveASentMeme()
+                
+            // and show the Sent Memes View Selector after saving the Sent Meme
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
+            self.presentViewController(vc, animated: true, completion: nil)
+                
+            }
         
         }
+        
     }
     
     
