@@ -14,6 +14,7 @@ import Dispatch
 class MemeTableViewController:  UITableViewController, UITableViewDataSource, UITableViewDelegate {
     
     var memes: [Meme]!
+
     
     override func viewWillAppear(animated: Bool) {
         let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
@@ -94,11 +95,11 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
         if editingStyle == UITableViewCellEditingStyle.Delete {
             let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
             memes = applicationDelegate.memes
-            memes.removeAtIndex(indexPath.row)
+            applicationDelegate.memes.removeAtIndex(indexPath.row)
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
             tableView.reloadData()
             
-                println("You have now \(memes.count) Memes after deletion")
+            println("You have now \(memes.count) Memes after deletion")
 
         }
     }

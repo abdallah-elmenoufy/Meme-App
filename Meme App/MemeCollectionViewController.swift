@@ -12,7 +12,7 @@ import UIKit
 class MemeCollectionViewController: UICollectionViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate {
     
     var memes: [Meme]!
-    var memeTableView = MemeTableViewController()
+
     
     // To add a new Meme image, by launching the Meme Editor Screen
     @IBAction func addButton() {
@@ -54,10 +54,10 @@ class MemeCollectionViewController: UICollectionViewController, UICollectionView
         } else if self.editButtonItem().title == "Done" {
             let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
             memes = applicationDelegate.memes
-            memes.removeAtIndex(indexPath.row)
+            applicationDelegate.memes.removeAtIndex(indexPath.row)
             var deletions: NSArray = [indexPath]
             self.collectionView?.deleteItemsAtIndexPaths(deletions as [AnyObject])
-            memeTableView.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+           
             println("You have now \(memes.count) Memes in CollectionView")
         }
     }
