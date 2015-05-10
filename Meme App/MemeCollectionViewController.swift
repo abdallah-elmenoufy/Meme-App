@@ -21,46 +21,69 @@ class MemeCollectionViewController: UICollectionViewController, UICollectionView
         self.presentViewController(vc, animated: true, completion: nil)
     }
     
+    // MARK: - CollectionView life cycle methods **** //
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        memes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
+        collectionView!.reloadData()
+        
+        // In case no Sent Memes yet, jump to the MemeEditorVC directly
+        if memes.count == 0 {
+            let storyboard = self.storyboard
+            let vc = storyboard!.instantiateViewControllerWithIdentifier("MemeViewController") as! UIViewController
+            self.presentViewController(vc, animated: true, completion: nil)
+            
+            println("CollectonViewDidAppear with \(memes.count) == 0 SentMemes")
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.leftBarButtonItem = editButtonItem()
-        let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        memes = applicationDelegate.memes
+        memes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
         self.collectionView!.reloadData()
     }
     
+    
+    
+    // MARK: - CollectionView DataSourceDelegate Methods **** //
+    
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.memes.count
+        return memes.count
     }
     
-    
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("SentMemeItem", forIndexPath: indexPath) as! MemeCollectionViewCell
-        let sentMeme = self.memes[indexPath.row]
+        let sentMeme = memes[indexPath.item]
         cell.memedImage.image = sentMeme.memedImage
         
         return cell
-        
     }
+    
     // To show up a selected Sent Meme in a separete view
     override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         if self.editButtonItem().title == "Edit" {
         let memeDetailsController = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailsViewController") as! MemeDetailsViewController
         memeDetailsController.hidesBottomBarWhenPushed = true
-        memeDetailsController.meme = self.memes[indexPath.row]
+        memeDetailsController.meme = self.memes[indexPath.item]
         self.navigationController!.pushViewController(memeDetailsController, animated: false)
+            println("MemeDetails are here")
             
+        // To delete a Meme from the collection view when Edit button is clicked
         } else if self.editButtonItem().title == "Done" {
             let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
             memes = applicationDelegate.memes
-            applicationDelegate.memes.removeAtIndex(indexPath.row)
-            var deletions: NSArray = [indexPath]
-            self.collectionView?.deleteItemsAtIndexPaths(deletions as [AnyObject])
-           
+            if memes.count > 0 {
+            applicationDelegate.memes.removeAtIndex(indexPath.item)
+            self.collectionView?.deleteItemsAtIndexPaths([indexPath] as [AnyObject])
+                
+            }
             println("You have now \(memes.count) Memes in CollectionView")
         }
     }
+    
+    
     
     // MARK: - UICollectionViewFlowLayout
     

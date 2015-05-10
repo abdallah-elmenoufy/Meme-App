@@ -33,10 +33,10 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     // Setting the text fields' text attributes
     let memeTextAttributes = [
-        NSStrokeColorAttributeName: UIColor.purpleColor(),
+        NSStrokeColorAttributeName: UIColor.blackColor(),
         NSForegroundColorAttributeName: UIColor.whiteColor(),
-        NSFontAttributeName: UIFont(name: "Trebuchet-BoldItalic", size: 40)!,
-        NSStrokeWidthAttributeName: NSNumber(float: -2.0)
+        NSFontAttributeName: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+        NSStrokeWidthAttributeName: NSNumber(float: -3.0)
     ]
     
     
@@ -58,10 +58,11 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             
         } else if (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count > 0 {
         
-        // Bring the Semt Memes VC onto the stack VC
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
-        self.presentViewController(vc, animated: true, completion: nil)
+        // Bring the Sent Memes VC onto the stack VC
+            dismissViewControllerAnimated(true, completion: nil)
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
+//        self.presentViewController(vc, animated: true, completion: nil)
             
         }
     }
@@ -113,6 +114,10 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         self.topTextField.delegate = topTextFieldDelegate
         self.bottomTextField.delegate = bottomTextFieldDelegate
         
+        // Add the small (x) button in the text fields
+        topTextField.clearButtonMode = UITextFieldViewMode.WhileEditing
+        bottomTextField.clearButtonMode = UITextFieldViewMode.WhileEditing
+        
     }
     
     
@@ -144,13 +149,13 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             // Enable the shareButton after user has successfully selected an image
             shareButton.enabled = true
         }
-        self.dismissViewControllerAnimated(true, completion: nil)
+            dismissViewControllerAnimated(true, completion: nil)
         
     }
     
     // Dismissing the image picker controller when user cancels the picking process
     func imagePickerControllerDidCancel(imagePickerView: UIImagePickerController) {
-            self.dismissViewControllerAnimated(true, completion: nil)
+            dismissViewControllerAnimated(true, completion: nil)
         }
     
     
@@ -178,16 +183,25 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     // Measuring the keyboard's height, to be used in show/hide keyboard's frame functions
     func getKeyboardHeight(notification: NSNotification) -> CGFloat {
-        let userInfo = notification.userInfo
-        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
-        return keyboardSize.CGRectValue().height
+        // Get the keyboard's height in case ONLY botton textfield is being edited
+        if bottomTextField.editing {
+            let userInfo = notification.userInfo
+            let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
+            return keyboardSize.CGRectValue().height
+            
+        } else {
+            
+            // Return 0, not to shift the entire view up while editing the top textfield
+            return 0
+            
+        }
     }
     
     // Implemnt the Share button fuction
     @IBAction func shareToSocialMedia() {
-        var sharedMeme = generateMemedImage()
-        var sharingController = UIActivityViewController(activityItems: [sharedMeme], applicationActivities: nil)
-        self.presentViewController(sharingController, animated: true, completion: nil)
+        let sharedMeme = generateMemedImage()
+        let sharingController = UIActivityViewController(activityItems: [sharedMeme], applicationActivities: nil)
+        presentViewController(sharingController, animated: true, completion: nil)
         
         // Save any Sent Memes inside the app,
         sharingController.completionWithItemsHandler = {

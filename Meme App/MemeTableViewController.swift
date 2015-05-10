@@ -16,12 +16,6 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
     var memes: [Meme]!
 
     
-    override func viewWillAppear(animated: Bool) {
-        let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        memes = applicationDelegate.memes
-//        tableView.reloadData()
-    }
-    
     // To add a new Meme image, by launching the Meme Editor Screen
     @IBAction func addButton() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -29,47 +23,54 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
         self.presentViewController(vc, animated: true, completion: nil)
     }
     
+  
+    // ******* View life cycle functions - 3 Cycles *******
+    override func viewWillAppear(animated: Bool) {
+        memes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
+        tableView.reloadData()
+        tableView.rowHeight = 120
+    }
     
-    // Overriding this function to check if the user has some Sent Memes to show first, or launch the Meme Editor directly
+   
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-//        tableView.reloadData()
-        let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        memes = applicationDelegate.memes
+        memes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
+        tableView.reloadData()
         
-        if memes.count > 0 {
-            
-            println("You have \(memes.count) >0 SentMemes")
-            
-        }
-            
-        else if self.memes.count == 0 {
+        // Check if the user has some Sent Memes to show first, or launch the Meme Editor directly
+        if memes.count == 0 {
             
             let storyboard = self.storyboard
             let vc = storyboard!.instantiateViewControllerWithIdentifier("MemeViewController") as! UIViewController
             self.presentViewController(vc, animated: true, completion: nil)
-            println("You have \(memes.count) == 0 SentMemes")
+            
+            println("TableViewDidAppear with \(memes.count) == 0 SentMemes")
         }
     
     }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Add an Edit button as Left Bar Button Item
         self.navigationItem.leftBarButtonItem = self.editButtonItem()
-        let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        memes = applicationDelegate.memes
+        memes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
         
+        println("TableViewDidLoad with \(memes.count) SentMemes")
     }
     
+    
+    
+    // Implementing the UITableViewDelegate and UITableViewDataSource (3) methods
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.memes.count
+        println("return \(self.memes.count) SentMemes in tableview")
+        return memes.count
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("SentMemeCell") as! UITableViewCell
-        let sentMeme = self.memes[indexPath.row]
+        
+        let sentMeme = memes[indexPath.row]
         cell.imageView?.image = sentMeme.memedImage
         cell.imageView?.sizeToFit()
         cell.textLabel?.text = sentMeme.top
@@ -81,7 +82,7 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
     // To show up a selected Sent Meme in a separete view
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let memeDetailsController = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailsViewController") as! MemeDetailsViewController
-        memeDetailsController.meme = self.memes[indexPath.row]
+        memeDetailsController.meme = memes[indexPath.row]
         
         // To hide the bottom bar when pushed
         memeDetailsController.hidesBottomBarWhenPushed = true
@@ -90,18 +91,31 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
         self.navigationController!.pushViewController(memeDetailsController, animated: false)
     }
     
-    // To delete a Sent Meme from the table view using either Swipe to left, or when the Delete Button is shown and tapped after pressing the Edit left-bar-button "incorprated with the below overriden functions - (1) and (2)"
+    
+    
+    // To delete a Sent Meme from the table view using either Swipe to left, or when the Delete Button is shown and tapped after pressing the Edit left-bar-button "incorprated with the below overriden functions - (1), (2) and (3)"
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        
+        memes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
+        
         if editingStyle == UITableViewCellEditingStyle.Delete {
-            let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-            memes = applicationDelegate.memes
-            applicationDelegate.memes.removeAtIndex(indexPath.row)
+            memes.removeAtIndex(indexPath.row)
+            (UIApplication.sharedApplication().delegate as! AppDelegate).memes.removeAtIndex(indexPath.row)
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
             tableView.reloadData()
-            
             println("You have now \(memes.count) Memes after deletion")
-
         }
+        
+    }
+    
+    // Move a row to another location Up/Down
+    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+        let movedRow = self.memes.removeAtIndex(sourceIndexPath.row)
+        (UIApplication.sharedApplication().delegate as! AppDelegate).memes.removeAtIndex(sourceIndexPath.row)
+        
+        // Match the model array with the current UITableView after a successful row-move
+        memes.insert(movedRow, atIndex: destinationIndexPath.row)
+        (UIApplication.sharedApplication().delegate as! AppDelegate).memes.insert(movedRow, atIndex: destinationIndexPath.row)
     }
     
     // (1)
@@ -112,6 +126,12 @@ class MemeTableViewController:  UITableViewController, UITableViewDataSource, UI
     // (2)
     override func tableView(tableView: UITableView, shouldIndentWhileEditingRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
+    }
+    
+    // (3)
+    override func setEditing(editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        tableView!.setEditing(editing, animated: animated)
     }
 
 }
