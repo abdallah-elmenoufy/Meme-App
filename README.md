@@ -25,9 +25,14 @@ The app has 3 main viewControllers; named and funcitoned as follows:
     - Delete: to delete the current displayed meme and return back to the original selector screen "Table or CollectionVCs".
   - A Back button is presented to allow user to return back to the original selector screen "Table or CollectionVCs"
   
-  
-  
-  
+
+# Future:
+  - Many future capabilities are expected for implementation, that should include but not limited to:
+    - Save the memedImage to the device's memeroy "use of presistance"
+    - Corp image while editing
+    - Make use of touch-gestures; like zoom in and out while editing
+    - Allow to change text font, size, and color while editing
+    -  ... and many others as soon as they got pushed to my head while sketching the app ;)
   
   
   
