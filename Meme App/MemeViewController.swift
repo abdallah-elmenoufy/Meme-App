@@ -9,7 +9,7 @@
 import UIKit
 
 class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
-
+    
     
     // Connecting the IBOutlets
     @IBOutlet weak var imageView: UIImageView!
@@ -22,14 +22,12 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     @IBOutlet weak var topToolBar: UIToolbar!
     @IBOutlet weak var bottomToolBar: UIToolbar!
     
-    
+
+// MARK: - TextFields and their associated functions/attributes/delegates
     
     // Declaring the delegates for both text fields "Not that mandatory in the udacity's requests, but I made them for future enhancments if required by clients ;)
     var topTextFieldDelegate = TopTextFieldDelegate()
     var bottomTextFieldDelegate = BottomTextFieldDelegate()
-    
-    // Instantiating the UIImagePickerController
-    let imagePickerController = UIImagePickerController()
     
     // Setting the text fields' text attributes
     let memeTextAttributes = [
@@ -39,34 +37,37 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         NSStrokeWidthAttributeName: NSNumber(float: -3.0)
     ]
     
-    
-    // Cancel Button
-    @IBAction func cancelButton() {
-        
-        // Cancels the Meme-ing process and returns the MemeVC to its defauls
-        imageView.image = nil
+    // Defaults of the text fields when app first launches
+    func defaultSettings() {
         topTextField.text = "TOP"
+        topTextField.textAlignment = NSTextAlignment.Center
         bottomTextField.text = "BOTTOM"
-        shareButton.enabled = false
-        
-        // Alert the user if he hasn't sent any Memes yet and trying to Cancel the MemeEditorVC to show the Sent Memes VC
-        if (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count == 0 {
-            let alertController = UIAlertController(title: "Oops!", message: "You haven't sent any memes yet :)", preferredStyle: UIAlertControllerStyle.Alert)
-            let okAction = UIAlertAction(title: "Okay, let's Meme", style: UIAlertActionStyle.Default, handler: nil)
-            alertController.addAction(okAction)
-            self.presentViewController(alertController, animated: true, completion: nil)
-            
-        } else if (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count > 0 {
-        
-        // Bring the Sent Memes VC onto the stack VC
-            dismissViewControllerAnimated(true, completion: nil)
-//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//        let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
-//        self.presentViewController(vc, animated: true, completion: nil)
-            
-        }
+        bottomTextField.textAlignment = NSTextAlignment.Center
     }
+    
 
+// MARK: - UIImagePickerController and its associated functions //
+    
+    // Instantiating the UIImagePickerController
+    let imagePickerController = UIImagePickerController()
+
+    // Showing the selected image in the editor after picking-up is accomplished successfully
+    func imagePickerController(imagePickerController: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
+        if let originalImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            self.imageView.image = originalImage
+            self.imageView.contentMode = UIViewContentMode.ScaleToFill
+            
+            // Enable the shareButton after user has successfully selected an image
+            shareButton.enabled = true
+        }
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    
+    // Dismissing the image picker controller when user cancels the picking process
+    func imagePickerControllerDidCancel(imagePickerView: UIImagePickerController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
     
     // General purpose picking an Image function
     func pickingImage() {
@@ -88,14 +89,10 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         pickingImage()
         imagePickerController.sourceType = UIImagePickerControllerSourceType.Camera
     }
-   
-    // Defaults of the text fields when app first launches
-    func defaultSettings() {
-        topTextField.text = "TOP"
-        topTextField.textAlignment = NSTextAlignment.Center
-        bottomTextField.text = "BOTTOM"
-        bottomTextField.textAlignment = NSTextAlignment.Center
-    }
+    
+    
+    
+// MARK:- View Life Cycles - (3) Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -120,7 +117,6 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
     }
     
-    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         defaultSettings()
@@ -138,26 +134,9 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         // To adhere to keyboard's disappearance mechanism
         self.unsubscribeFromKeyboardNotifications()
     }
-    
 
-    // Showing the selected image in the editor after picking-up is accomplished successfully
-    func imagePickerController(imagePickerController: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
-        if let originalImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            self.imageView.image = originalImage
-            self.imageView.contentMode = UIViewContentMode.ScaleToFill
-            
-            // Enable the shareButton after user has successfully selected an image
-            shareButton.enabled = true
-        }
-            dismissViewControllerAnimated(true, completion: nil)
-        
-    }
-    
-    // Dismissing the image picker controller when user cancels the picking process
-    func imagePickerControllerDidCancel(imagePickerView: UIImagePickerController) {
-            dismissViewControllerAnimated(true, completion: nil)
-        }
-    
+
+// MARK: - Interactions with the Keyboard while editing the textFields //
     
     // Describe the keyboard's notification subscribtion
     func subscribeToKeyboardNotifications() {
@@ -190,12 +169,13 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
             return keyboardSize.CGRectValue().height
             
         } else {
-            
             // Return 0, not to shift the entire view up while editing the top textfield
             return 0
-            
         }
     }
+   
+    
+// MARK: - Share to socialMedia using UIActivityViewController
     
     // Implemnt the Share button fuction
     @IBAction func shareToSocialMedia() {
@@ -207,29 +187,25 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         sharingController.completionWithItemsHandler = {
             (activity, success, items, error) in
             if success {
-              self.saveASentMeme()
+                // Save the activity-passed Meme into the SharedDataContainer inside the AppDelegate using the following funciton
+                self.saveASentMeme()
                 
-            // and show the Sent Memes View Selector after saving the Sent Meme
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
-            self.presentViewController(vc, animated: true, completion: nil)
-                
+                // and show the Sent Memes View Selector after saving the Sent Meme
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
+                self.presentViewController(vc, animated: true, completion: nil)
             }
-        
         }
-        
     }
     
+
+// MARK: - Generating and Saving the Meme
     
     // Saving the Sent Meme into an array of Memes inside AppDelegate
     func saveASentMeme() {
         var meme = Meme(top: topTextField.text!, bottom: bottomTextField.text!, image: imageView.image!, memedImage: generateMemedImage())
         (UIApplication.sharedApplication().delegate as! AppDelegate).memes.append(meme)
-        
-        var memoz = (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count
-        println("You have \(memoz) Memes Sent")
     }
-    
     
     // Generating a Meme Image
     func generateMemedImage() -> UIImage {
@@ -250,7 +226,74 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         return memedImage
     }
+
     
+    
+// MARK:- Cancel button has 4 cases to process, each has its own UIAlertViewController with its related UIAlertActions; please see the following //
+    
+    @IBAction func cancelButton() {
+        var x = (UIApplication.sharedApplication().delegate as! AppDelegate).memes.count
+        var y = Int(x > 0)
+        
+        // Switching on the Meme array.count
+        switch x {
+            
+        // (1) User hasn't sent any Memes yet, and didn't picked an Image as well
+        case 0 where self.imageView.image == nil:
+            let alertController = UIAlertController(title: "Oops!", message: "You haven't sent any memes yet :)", preferredStyle: UIAlertControllerStyle.Alert)
+            let okAction = UIAlertAction(title: "Okay, let's Meme", style: UIAlertActionStyle.Default, handler: nil)
+            alertController.addAction(okAction)
+            self.presentViewController(alertController, animated: true, completion: nil)
+            break;
+            
+        // (2) User hasn't sent any Memes yet, but has picked an Image
+        case 0 where self.imageView.image != nil:
+            let alertController = UIAlertController(title: "CANCEL!", message: "This will dismiss the unsaved Meme, sure ?", preferredStyle: UIAlertControllerStyle.Alert)
+            let okAction = UIAlertAction(title: "Yes", style: .Destructive) {(action) in self.reset()}
+            alertController.addAction(okAction)
+            let cancelAction = UIAlertAction(title: "No", style: .Cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            self.presentViewController(alertController, animated: true, completion: nil)
+            break;
+            
+        // (3) User has some Sent Memes, but didn't pick an Image yet
+        case y where self.imageView.image == nil:
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
+            self.presentViewController(vc, animated: true, completion: nil)
+            break;
+           
+        // (4) User has some Sent Memes, and picked an Image to start editing it
+        case y where self.imageView.image != nil:
+            let alertController = UIAlertController(title: "CANCEL!", message: "This will dismiss the unsaved Meme and open Sent Memes, sure ?", preferredStyle: UIAlertControllerStyle.Alert)
+            let cancelAction = UIAlertAction(title: "No", style: .Cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            
+            let resetAction = UIAlertAction(title: "Dismiss Only", style: .Destructive) {(action) in self.reset()}
+            alertController.addAction(resetAction)
+            
+            let okAction = UIAlertAction(title: "Yes", style: .Destructive) { (action) in
+                self.reset()
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let vc = storyboard.instantiateViewControllerWithIdentifier("TabBarOfSentMemes") as! UIViewController
+                self.presentViewController(vc, animated: true, completion: nil)
+            }
+            alertController.addAction(okAction)
+            self.presentViewController(alertController, animated: true, completion: nil)
+            break;
+            
+        default:
+            break;
+        }
+    }
+    
+    // Cancels the Meme-ing process and returns the MemeEditorVC to its defauls
+    func reset() {
+        imageView.image = nil
+        topTextField.text = "TOP"
+        bottomTextField.text = "BOTTOM"
+        shareButton.enabled = false
+    }
 }
 
 
